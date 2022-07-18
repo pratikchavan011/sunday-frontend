@@ -6,9 +6,13 @@ import ScoopOptions from "./ScoopOptions";
 import ToppingOptions from "./ToppingOptions";
 import AlertBanner from "../common/AlertBanner";
 
+import { pricePerItem } from "../../constants";
+import { useOrderDetails } from "../../context/orderDetails";
+
 const Options = ({ OptionType }) => {
   const [items, setItems] = useState([]);
   const [error, setError] = useState(false);
+  const [orderDetails, updateItemCount] = useOrderDetails();
 
   useEffect(() => {
     axios
@@ -19,9 +23,9 @@ const Options = ({ OptionType }) => {
       .catch((err) => setError(true));
   }, [OptionType]);
 
-  if(error){
-    console.log('Errror occurred for '+OptionType);
-    return <AlertBanner key={`alertFor${OptionType}`} />
+  if (error) {
+    // console.log("Errror occurred for " + OptionType);
+    return <AlertBanner key={`alertFor${OptionType}`} />;
   }
 
   const ItemComponent =
@@ -31,15 +35,29 @@ const Options = ({ OptionType }) => {
       ? ToppingOptions
       : null;
 
+  const Title = OptionType[0].toUpperCase() + OptionType.slice(1).toLowerCase();
+
   const OptionsItems = items.map((item) => (
     <ItemComponent
       key={item.name}
       name={item.name}
       imagePath={item.imagePath}
+      updateItemCount={(itemName, itemCount) =>
+        updateItemCount(itemName, itemCount, OptionType)
+      }
     />
   ));
-
-  return <Row>{OptionsItems}</Row>;
+  
+  return (
+    <>
+      <h2>{Title}</h2>
+      <p>{pricePerItem[OptionType]} each</p>
+      <p>
+        {Title} total: {orderDetails.totals[OptionType]}
+      </p>
+      <Row>{OptionsItems}</Row>
+    </>
+  );
 };
 
 export default Options;
