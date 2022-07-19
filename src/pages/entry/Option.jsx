@@ -8,6 +8,7 @@ import AlertBanner from "../common/AlertBanner";
 
 import { pricePerItem } from "../../constants";
 import { useOrderDetails } from "../../context/orderDetails";
+import { formatCurrency } from '../../utilities'
 
 const Options = ({ OptionType }) => {
   const [items, setItems] = useState([]);
@@ -51,7 +52,7 @@ const Options = ({ OptionType }) => {
   return (
     <>
       <h2>{Title}</h2>
-      <p>{pricePerItem[OptionType]} each</p>
+      <p>{formatCurrency(pricePerItem[OptionType])} each</p>
       <p>
         {Title} total: {orderDetails.totals[OptionType]}
       </p>

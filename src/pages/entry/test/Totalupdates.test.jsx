@@ -60,16 +60,49 @@ test("update toppings subtotal when topping changes", async () => {
 });
 
 describe('Grand Total:', () => {
-    test('Start at zero',  () => {
-        render(<OrderEntry />);
+    // test('Start at zero',  () => {
+    //     render(<OrderEntry />);
+    //     const grandTotalElement = screen.getByRole('heading', { name: /grand total: \$/i });
+    //     expect(grandTotalElement).toHaveTextContent('0.00')
+    // })
 
+    test('grand total updates properly if scoop added first', async() => {
+        render(<OrderEntry />);
         const grandTotalElement = screen.getByRole('heading', { name: /grand total: \$/i });
 
         expect(grandTotalElement).toHaveTextContent('0.00')
-    })
 
-    test('grand total updates properly if scoop added first', () => {})
-    test('grand total updates properly if topping added first', () => {})
-    test('grand total updates properly if the item is removed', () => {})
+        const scoopSpinButton = await screen.findByRole('spinbutton', { name: 'Venilla' });
+        userEvent.clear(scoopSpinButton);
+        userEvent.type(scoopSpinButton, '1');
+
+        expect(grandTotalElement).toHaveTextContent('2.00')
+    })
+    test('grand total updates properly if topping added first', async () => {
+        render(<OrderEntry />);
+        const grandTotalElement = screen.getByRole('heading', { name: /grand total: \$/i });
+        const toppingCheckbox = await screen.findByRole('checkbox', { name: /M&Ms/i });
+        userEvent.click(toppingCheckbox);
+
+        expect(grandTotalElement).toHaveTextContent("1.50");
+    })
+    test('grand total updates properly if the item is removed', async () => {
+        render(<OrderEntry />);
+        const grandTotalElement = screen.getByRole('heading', { name: /grand total: \$/i });
+        const venillaScoop = await screen.findByRole('spinbutton', { name: /Venilla/i});
+        const cherriesCheckbox = await screen.findByRole('checkbox', { name: /cherries/i });
+        // adding venilla
+        userEvent.clear(venillaScoop);
+        userEvent.type(venillaScoop, '1');
+        // adding cherries
+        userEvent.click(cherriesCheckbox);
+        // testing grand total. 
+        expect(grandTotalElement).toHaveTextContent("3.50");
+        // removing venilla
+        userEvent.clear(venillaScoop);
+        userEvent.type(venillaScoop, "0");
+        // testing grand total after removing venilla
+        expect(grandTotalElement).toHaveTextContent("1.50");
+    })
 })
 
