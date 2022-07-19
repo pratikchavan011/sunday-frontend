@@ -4,7 +4,7 @@ import Form from "react-bootstrap/Form";
 
 const ToppingOptions = ({ name, imagePath, updateItemCount }) => {
   const handleChange = (event) => {
-    updateItemCount(name, event.target.value);
+    updateItemCount(name, event.target.checked ? 1 : 0);
   };
 
   return (
@@ -21,17 +21,14 @@ const ToppingOptions = ({ name, imagePath, updateItemCount }) => {
           marginTop: "10px",
         }}
       >
-        <Form.Label column xs="6" style={{ textAlign: "right" }}>
-          {name}
-        </Form.Label>
-        <Col xs="5" style={{ textAlign: "right" }}>
-          <Form.Control
-            type="number"
-            defaultValue={0}
-            onChange={handleChange}
-            name={name}
-            role="spinbutton"
-          />
+        <Col>
+          <Form.Check
+          type="checkbox"
+          id={name}
+          name={name}
+          label={name}
+          onChange={handleChange}
+        />
         </Col>
       </Form.Group>
     </Col>
