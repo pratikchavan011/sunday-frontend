@@ -1,8 +1,12 @@
 import { memo, useState, useCallback, useMemo } from "react";
 import { Button, Form, Popover, OverlayTrigger } from "react-bootstrap";
 
+import { orderPhases } from "../../constants";
+import { useOrderDetails } from '../../context/orderDetails';
+
 const SummaryForm = () => {
   const [getIsUserAgreeTC, setIsUserAgreeTC] = useState(false);
+  const [ , , setOrderPhaseFn] = useOrderDetails();
 
   const handleCheckboxChange = useCallback((e) => {
     // console.log(e.target.checked);
@@ -30,6 +34,10 @@ const SummaryForm = () => {
     [popover]
   );
 
+  const handleConfirmOrderClick = () => {
+    setOrderPhaseFn(orderPhases.COMPLETE);
+  }
+
   return (
     <Form>
       <Form.Group className="mb-3" controlId="terms-and-conditions">
@@ -41,7 +49,7 @@ const SummaryForm = () => {
           onChange={handleCheckboxChange}
         />
       </Form.Group>
-      <Button variant="primary" type="submit" disabled={!getIsUserAgreeTC}>
+      <Button variant="primary" type="submit" disabled={!getIsUserAgreeTC} onClick={handleConfirmOrderClick}>
         Confirm Order
       </Button>
     </Form>

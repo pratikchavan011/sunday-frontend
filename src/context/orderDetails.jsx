@@ -1,8 +1,14 @@
-import { useEffect } from "react";
-import { createContext, useContext, useState, useMemo } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+} from "react";
 
-import { pricePerItem } from "../constants";
-import { formatCurrency } from '../utilities';
+import { pricePerItem, orderPhases } from "../constants";
+import { formatCurrency } from "../utilities";
 
 const OrderDetails = createContext();
 
@@ -21,16 +27,36 @@ export function useOrderDetails() {
 }
 
 export function OrderDetailsProvider(props) {
+  const zeroCurrency = formatCurrency(0);
+  const totalsDefaultState = useMemo(
+    () => ({
+      scoops: zeroCurrency,
+      toppings: zeroCurrency,
+      grandTotal: zeroCurrency,
+    }),
+    [zeroCurrency]
+  );
+
   const [optionsCounts, setOptionCounts] = useState({
     scoops: new Map(),
     toppings: new Map(),
   });
-  const zeroCurrency = formatCurrency(0);
-  const [totals, setTotals] = useState({
-    scoops: zeroCurrency,
-    toppings: zeroCurrency,
-    grandTotal: zeroCurrency,
-  });
+  const [totals, setTotals] = useState(totalsDefaultState);
+  const [orderPhase, setOrderPhase] = useState(orderPhases.ordering); // 'ORDERING' | 'PAYMENT' | 'COMPLETE'
+
+  const setOrderPhaseFn = (newOrderPhase) => {
+    if (orderPhases.hasOwnProperty(newOrderPhase))
+      setOrderPhase(orderPhases[newOrderPhase]);
+  };
+
+  const resetOrder = useCallback(() => {
+    setOptionCounts({
+      scoops: new Map(),
+      toppings: new Map(),
+    });
+    setTotals(totalsDefaultState);
+    setOrderPhase(orderPhases.ordering);
+  }, [totalsDefaultState]);
 
   function calculateSubtotal(cOptionType, cOptionCounts) {
     let optionCount = 0;
@@ -65,8 +91,13 @@ export function OrderDetailsProvider(props) {
 
     //getter: Object containing option count for scoops and toppings. subtotal sand totals.
     //setter: updateObjectCount
-    return [{ ...optionsCounts, totals }, updateItemCount];
-  }, [optionsCounts, totals]);
+    return [
+      { ...optionsCounts, totals, orderPhase },
+      updateItemCount,
+      setOrderPhaseFn,
+      resetOrder,
+    ];
+  }, [optionsCounts, orderPhase, resetOrder, totals]);
 
   return <OrderDetails.Provider value={value} {...props} />;
 }
